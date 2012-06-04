@@ -380,8 +380,8 @@ unsigned int irq_create_mapping(struct irq_domain *domain,
 		return 0;
 	}
 
-	pr_debug("irq: irq %lu on domain %s mapped to virtual irq %u\n",
-		hwirq, domain->of_node ? domain->of_node->full_name : "null", virq);
+	pr_debug("irq %lu on domain %s mapped to virtual irq %u\n",
+		hwirq, of_node_full_name(domain->of_node), virq);
 
 	return virq;
 }
@@ -409,8 +409,8 @@ unsigned int irq_create_of_mapping(struct device_node *controller,
 		if (intsize > 0)
 			return intspec[0];
 #endif
-		printk(KERN_WARNING "irq: no irq domain found for %s !\n",
-		       controller->full_name);
+		pr_warning("no irq domain found for %s !\n",
+			   of_node_full_name(controller));
 		return 0;
 	}
 
@@ -655,8 +655,8 @@ static int virq_debug_show(struct seq_file *m, void *private)
 			data = irq_desc_get_chip_data(desc);
 			seq_printf(m, data ? "0x%p  " : "  %p  ", data);
 
-			if (desc->irq_data.domain && desc->irq_data.domain->of_node)
-				p = desc->irq_data.domain->of_node->full_name;
+			if (desc->irq_data.domain)
+				p = of_node_full_name(desc->irq_data.domain->of_node);
 			else
 				p = none;
 			seq_printf(m, "%s\n", p);
