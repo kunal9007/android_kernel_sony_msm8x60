@@ -35,7 +35,10 @@ static void __init of_selftest_parse_phandle_with_args(void)
 		return;
 	}
 
-	for (i = 0; i < 7; i++) {
+	rc = of_count_phandle_with_args(np, "phandle-list", "#phandle-cells");
+	selftest(rc == 7, "of_count_phandle_with_args() returned %i, expected 7\n", rc);
+
+	for (i = 0; i < 8; i++) {
 		bool passed = true;
 		rc = of_parse_phandle_with_args(np, "phandle-list",
 						"#phandle-cells", i, &args);
@@ -100,24 +103,34 @@ static void __init of_selftest_parse_phandle_with_args(void)
 	/* Check for missing list property */
 	rc = of_parse_phandle_with_args(np, "phandle-list-missing",
 					"#phandle-cells", 0, &args);
-	passed_all &= (rc == -EINVAL);
+	selftest(rc == -ENOENT, "expected:%i got:%i\n", -ENOENT, rc);
+	rc = of_count_phandle_with_args(np, "phandle-list-missing",
+					"#phandle-cells");
+	selftest(rc == -ENOENT, "expected:%i got:%i\n", -ENOENT, rc);
 
 	/* Check for missing cells property */
 	rc = of_parse_phandle_with_args(np, "phandle-list",
 					"#phandle-cells-missing", 0, &args);
-	passed_all &= (rc == -EINVAL);
+	selftest(rc == -EINVAL, "expected:%i got:%i\n", -EINVAL, rc);
+	rc = of_count_phandle_with_args(np, "phandle-list",
+					"#phandle-cells-missing");
+	selftest(rc == -EINVAL, "expected:%i got:%i\n", -EINVAL, rc);
 
 	/* Check for bad phandle in list */
 	rc = of_parse_phandle_with_args(np, "phandle-list-bad-phandle",
 					"#phandle-cells", 0, &args);
-	passed_all &= (rc == -EINVAL);
+	selftest(rc == -EINVAL, "expected:%i got:%i\n", -EINVAL, rc);
+	rc = of_count_phandle_with_args(np, "phandle-list-bad-phandle",
+					"#phandle-cells");
+	selftest(rc == -EINVAL, "expected:%i got:%i\n", -EINVAL, rc);
 
 	/* Check for incorrectly formed argument list */
 	rc = of_parse_phandle_with_args(np, "phandle-list-bad-args",
 					"#phandle-cells", 1, &args);
-	passed_all &= (rc == -EINVAL);
-
-	pr_info("end - %s\n", passed_all ? "PASS" : "FAIL");
+	selftest(rc == -EINVAL, "expected:%i got:%i\n", -EINVAL, rc);
+	rc = of_count_phandle_with_args(np, "phandle-list-bad-args",
+					"#phandle-cells");
+	selftest(rc == -EINVAL, "expected:%i got:%i\n", -EINVAL, rc);
 }
 
 static void __init of_selftest_property_match_string(void)
